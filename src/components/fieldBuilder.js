@@ -2,19 +2,23 @@ import React, { Component } from 'react';
 import { Row, Col, Card, Form, ListGroup, Button } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import AddChoicePrompt from './addChoicePrompt';
+import FormPreview from './formPreview';
+import { postField } from '../services/service'
 import '../assets/styles/field-builder.css'
 
 const initialState = {
-  label: '',
-  type: 'single',
-  required: false,
-  defaultValue: '',
-  newChoice: '',
   choices: [],
-  order: 'alpha',
-  modalVisible: false,
+  defaultValue: '',
+  formComplete: false,
   invalidChoice: false,
+  label: '',
+  newChoice: '',
+  order: 'alpha',
+  previewVisible: false,
+  promptVisible: false,
+  required: false,
   selectedChoice: null,
+  type: 'single',
 };
 
 class FieldBuilder extends Component {
@@ -23,13 +27,20 @@ class FieldBuilder extends Component {
     this.state = initialState;
   }
 
-  componentDidUpdate() {
-    console.log(this.state);
+  componentDidUpdate(prevState) {
+    if (prevState.defaultValue !== this.state.defaultValue || prevState.label !== this.state.label || prevState.choices !== this.state.choices) {
+      const formState = this.checkForm();
+      if (formState !== this.state.formComplete) {
+        this.setState({
+          formComplete: formState
+        })
+      }
+    }
   }
 
   addChoice = () => {
     if (this.state.newChoice.length > 0 && this.state.choices.indexOf(this.state.newChoice) === -1) {
-      this.toggleModal();
+      this.toggleChoiceModal();
       this.setState({
         choices: [...this.state.choices, this.state.newChoice],
         invalidChoice: false,
@@ -41,6 +52,11 @@ class FieldBuilder extends Component {
         invalidChoice: true,
       })
     }
+  }
+
+  checkForm = () => {
+    const state = this.state;
+    return (state.choices.length > 0 && state.defaultValue !== '' && state.label !== '');
   }
 
   clearForm = () => {
@@ -62,9 +78,34 @@ class FieldBuilder extends Component {
     })
   }
 
-  toggleModal = () => {
+  submitBuiltFields = () => {
+    const newChoices = () => {
+      if(this.state.choices.indexOf(this.state.defaultValue) === -1) {
+        return [...this.state.choices, this.state.defaultValue]
+      }
+      return this.state.choices;
+    }
+    const request = {
+      choices: newChoices(),
+      defaultValue: this.state.defaultValue,
+      label: this.state.label,
+      order: this.state.order,
+      required: this.state.required,
+      type: this.state.type,
+    }
+    console.log("REQUEST: ", request)
+    postField(request);
+  }
+
+  toggleChoiceModal = () => {
     this.setState({
-      modalVisible: !this.state.modalVisible,
+      promptVisible: !this.state.promptVisible,
+    })
+  }
+
+  togglePreviewModal = () => {
+    this.setState({
+      previewVisible: !this.state.previewVisible,
     })
   }
 
@@ -72,6 +113,13 @@ class FieldBuilder extends Component {
     this.setState({
       newChoice: event.target.value,
     })
+  }
+
+  updateOrder = () => {
+    const val = document.getElementById('order-selector').value;
+    this.setState({
+      order: (val === 'Alphabetical Order') ? 'alpha' : 'Reverse Alphabetical Order' ? 'reverse' : 'index',
+    });
   }
 
   updateType = () => {
@@ -102,7 +150,7 @@ class FieldBuilder extends Component {
                     Type
                   </Col>
                   <Col md="3">
-                    <Form.Control id="type-selector" onChange={this.updateType} as="select">
+                    <Form.Control as="select" id="type-selector" onChange={this.updateType}>
                       <option>Single</option>
                       <option>Multi-Select</option>
                     </Form.Control>
@@ -129,10 +177,10 @@ class FieldBuilder extends Component {
                         return <ListGroup.Item className={this.state.choices[this.state.selectedChoice] === c ? 'selected-choice' : ''} key={`item-${c}`} onClick={() => this.selectChoice(c)}>{c}</ListGroup.Item>;
                       })}
                     </ListGroup>
-                    <AddChoicePrompt visible={this.state.modalVisible} update={this.updateChoice} submit={this.addChoice} toggle={this.toggleModal} currentChoices={this.state.choices} invalid={this.state.invalidChoice} />
+                    <AddChoicePrompt visible={this.state.promptVisible} update={this.updateChoice} submit={this.addChoice} toggle={this.toggleChoiceModal} currentChoices={this.state.choices} invalid={this.state.invalidChoice} />
                   </Col>
                   <Col md="1">
-                    <Button variant="success" size="sm" onClick={this.toggleModal}><FontAwesomeIcon icon="plus" /></Button>
+                    <Button variant="success" size="sm" onClick={this.toggleChoiceModal}><FontAwesomeIcon icon="plus" /></Button>
                     <br />
                     <Button style={{display: `${this.state.selectedChoice !== null ? 'block' : 'none'}`}} onClick={() => this.deleteChoice(this.state.selectedChoice)} variant="success" size="sm"><FontAwesomeIcon icon="trash-alt" /></Button>
                   </Col>
@@ -142,7 +190,7 @@ class FieldBuilder extends Component {
                     Order
                   </Col>
                   <Col md="7">
-                    <Form.Control as="select">
+                    <Form.Control as="select" id="order-selector" onChange={this.updateOrder}>
                       <option>Alphabetical Order</option>
                       <option>Reverse Alphabetical Order</option>
                       <option>Order Added</option>
@@ -151,12 +199,14 @@ class FieldBuilder extends Component {
                 </Row>
                 <Row>
                   <Col md={{ span: 7, offset: 3 }}>
-                    <Button variant="success" onClick={this.submitBuiltFields}>Save Changes</Button>
+                    <Button variant="success" disabled={!this.state.formComplete} onClick={this.submitBuiltFields}>Save Changes</Button>
                     <Button variant="link" onClick={this.clearForm}>Clear Form</Button>
+                    {this.state.formComplete ? <Button variant="info" style={{float: 'right'}} onClick={this.togglePreviewModal}>Preview Field</Button> : null}
                   </Col>
                 </Row>
               </Card.Body>
             </Card>
+            {this.state.previewVisible ? <FormPreview settings={this.state} toggle={this.togglePreviewModal} /> : null}
           </Col>
         </Row>
       </div>
