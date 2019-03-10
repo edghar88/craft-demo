@@ -1,0 +1,28 @@
+.field-builder-container {
+  margin-top: 20px;
+}
+
+.field-builder-container .card {
+  border-color: #d3ebf6;
+}
+
+.field-builder-container .card-header {
+  background-color: #d3ebf6;
+  color: #1f6489;
+  font-weight: bold;
+}
+
+.choices-list {
+  height: 150px;
+  border: 1px solid #ced4da;
+  border-radius: .25rem;
+  overflow-y: auto;
+}
+
+.form-set {
+  margin-bottom: 30px;
+}
+
+.selected-choice {
+  background-color: skyblue;
+}

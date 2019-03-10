@@ -1,0 +1,17 @@
+html, body, #root, .App {
+  height: 100%;
+}
+
+.App {
+  background-color: #eee;
+}
+
+.App-header {
+  background-color: #693f92;
+  min-height: 90px;
+  padding-top: 30px;
+  text-align: center;
+  font-size: 22px;
+  color: #eee;
+  font-weight: bold;
+}

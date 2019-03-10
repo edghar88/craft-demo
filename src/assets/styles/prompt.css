@@ -1,0 +1,19 @@
+.add-choice-prompt {
+  position: absolute;
+  width: 100%;
+  top: 0;
+  right: 0;
+}
+
+.validation-text {
+  display: block;
+  color: red;
+}
+
+.add-choice-prompt button {
+  margin-top: 20px;
+}
+
+.add-choice-prompt h4 {
+  margin-bottom: 15px;
+}
