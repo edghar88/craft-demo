@@ -39,7 +39,7 @@ class FieldBuilder extends Component {
   }
 
   addChoice = () => {
-    if (this.state.newChoice.length > 0 && this.state.choices.indexOf(this.state.newChoice) === -1) {
+    if (this.state.newChoice.length > 0 && this.state.newChoice !== this.state.defaultValue && this.state.choices.indexOf(this.state.newChoice) === -1 && this.state.choices.length <= 49) {
       this.toggleChoiceModal();
       this.setState({
         choices: [...this.state.choices, this.state.newChoice],
@@ -56,7 +56,7 @@ class FieldBuilder extends Component {
 
   checkForm = () => {
     const state = this.state;
-    return (state.choices.length > 0 && state.defaultValue !== '' && state.label !== '');
+    return ((state.choices.length > 0 || state.defaultValue !== '') && state.label !== '');
   }
 
   clearForm = () => {
@@ -80,7 +80,7 @@ class FieldBuilder extends Component {
 
   submitBuiltFields = () => {
     const newChoices = () => {
-      if(this.state.choices.indexOf(this.state.defaultValue) === -1) {
+      if((this.state.choices.indexOf(this.state.defaultValue) === -1) && this.state.defaultValue !== '') {
         return [...this.state.choices, this.state.defaultValue]
       }
       return this.state.choices;
@@ -118,7 +118,7 @@ class FieldBuilder extends Component {
   updateOrder = () => {
     const val = document.getElementById('order-selector').value;
     this.setState({
-      order: (val === 'Alphabetical Order') ? 'alpha' : 'Reverse Alphabetical Order' ? 'reverse' : 'index',
+      order: (val === 'Alphabetical Order') ? 'alpha' : 'reverse',
     });
   }
 
@@ -143,6 +143,7 @@ class FieldBuilder extends Component {
                   </Col>
                   <Col md="7">
                     <Form.Control placeholder="Enter Field Label" value={this.state.label} onChange={(event) => this.setState({label: event.target.value})} />
+                    {this.state.label === '' ? <small style={{color: "red"}}>Label is required.</small> : null}
                   </Col>
                 </Row>
                 <Row className="form-set">
@@ -177,12 +178,11 @@ class FieldBuilder extends Component {
                         return <ListGroup.Item className={this.state.choices[this.state.selectedChoice] === c ? 'selected-choice' : ''} key={`item-${c}`} onClick={() => this.selectChoice(c)}>{c}</ListGroup.Item>;
                       })}
                     </ListGroup>
-                    <AddChoicePrompt visible={this.state.promptVisible} update={this.updateChoice} submit={this.addChoice} toggle={this.toggleChoiceModal} currentChoices={this.state.choices} invalid={this.state.invalidChoice} />
+                    <AddChoicePrompt visible={this.state.promptVisible} update={this.updateChoice} submit={this.addChoice} toggle={this.toggleChoiceModal} collectionSize={this.state.choices.length} invalid={this.state.invalidChoice} />
                   </Col>
                   <Col md="1">
                     <Button variant="success" size="sm" onClick={this.toggleChoiceModal}><FontAwesomeIcon icon="plus" /></Button>
-                    <br />
-                    <Button style={{display: `${this.state.selectedChoice !== null ? 'block' : 'none'}`}} onClick={() => this.deleteChoice(this.state.selectedChoice)} variant="success" size="sm"><FontAwesomeIcon icon="trash-alt" /></Button>
+                    <Button style={{marginTop: "10px", display: `${this.state.selectedChoice !== null ? 'block' : 'none'}`}} onClick={() => this.deleteChoice(this.state.selectedChoice)} variant="success" size="sm"><FontAwesomeIcon icon="trash-alt" /></Button>
                   </Col>
                 </Row>
                 <Row className="form-set">
@@ -193,7 +193,6 @@ class FieldBuilder extends Component {
                     <Form.Control as="select" id="order-selector" onChange={this.updateOrder}>
                       <option>Alphabetical Order</option>
                       <option>Reverse Alphabetical Order</option>
-                      <option>Order Added</option>
                     </Form.Control>
                   </Col>
                 </Row>

@@ -1,11 +1,13 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { Modal, Form, Button, Row, Col } from 'react-bootstrap';
 
 const FormPreview = ({ settings, toggle }) => {
+
+  const [selected, setSelected] = useState(settings.defaultValue);
   
   const orderedChoices = () => {
     const newChoices = () => {
-      if(settings.choices.indexOf(settings.defaultValue) === -1) {
+      if((settings.choices.indexOf(settings.defaultValue) === -1) && settings.defaultValue !== '') {
         return [...settings.choices, settings.defaultValue]
       }
       return settings.choices;
@@ -20,6 +22,10 @@ const FormPreview = ({ settings, toggle }) => {
         return newChoices();
     }
   }
+
+  function updateSelected(event) {
+    setSelected(event.target.value);
+  }
   
   return (
     <div className="add-choice-prompt">
@@ -31,7 +37,7 @@ const FormPreview = ({ settings, toggle }) => {
               {settings.label}
             </Col>
             <Col sm="9">
-              <Form.Control as="select" multiple={settings.type === 'multi'}>
+              <Form.Control as="select" value={selected} onChange={() => updateSelected} multiple={settings.type === 'multi'}>
                 {orderedChoices().map(c => <option key={`option-${c}`}>{c}</option>)}
               </Form.Control>
             </Col>
