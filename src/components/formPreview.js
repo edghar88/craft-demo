@@ -3,7 +3,7 @@ import { Modal, Form, Button, Row, Col } from 'react-bootstrap';
 
 const FormPreview = ({ settings, toggle }) => {
 
-  const [selected, setSelected] = useState(settings.defaultValue);
+  const [selected, setSelected] = settings.type === 'multi' ? useState([settings.defaultValue]) : useState(settings.defaultValue);
   
   const orderedChoices = () => {
     const newChoices = () => {
@@ -24,7 +24,16 @@ const FormPreview = ({ settings, toggle }) => {
   }
 
   function updateSelected(event) {
-    setSelected(event.target.value);
+    if(settings.type === 'multi') {
+      if(selected.includes(event.target.value)) {
+        const index = selected.indexOf(event.target.value);
+        setSelected(selected.splice(index, 1));
+      } else {
+        setSelected([...selected, event.target.value])
+      }
+    } else {
+      setSelected(event.target.value);
+    }
   }
   
   return (
@@ -37,7 +46,7 @@ const FormPreview = ({ settings, toggle }) => {
               {settings.label}
             </Col>
             <Col sm="9">
-              <Form.Control as="select" value={selected} onChange={() => updateSelected} multiple={settings.type === 'multi'}>
+              <Form.Control as="select" value={selected} onChange={updateSelected} multiple={settings.type === 'multi'}>
                 {orderedChoices().map(c => <option key={`option-${c}`}>{c}</option>)}
               </Form.Control>
             </Col>
