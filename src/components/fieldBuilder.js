@@ -156,7 +156,7 @@ class FieldBuilder extends Component {
                       <option>Multi-Select</option>
                     </Form.Control>
                   </Col>
-                  <Col md="3">
+                  <Col md="6">
                     <Form.Check type="checkbox" onClick={(event) => this.setState({required: event.target.checked})} label="A Value is Required" />
                   </Col>
                 </Row>
